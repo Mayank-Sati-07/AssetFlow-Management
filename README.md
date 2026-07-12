@@ -1,163 +1,330 @@
-# AssetFlow backend — beginner's guide
+#  AssetFlow - Smart Asset Management System
 
-This is a real, runnable backend. Nothing here is pseudocode. Read this top to bottom before touching the code — it explains *why* the folders are shaped this way, not just what's in them.
-
----
-
-## 1. The one idea to understand before anything else
-
-Every request to this backend flows through the same four stops, in the same order, every time:
-
-```
-Route  →  Middleware  →  Controller  →  Service  →  Database
-(URL)     (guards)       (traffic cop)  (the rules)  (Prisma)
-```
-
-- **Route** (`*.routes.js`) — just says "this URL + this HTTP method goes to that function." No logic.
-- **Middleware** (`auth.middleware.js`, `rbac.middleware.js`) — runs *before* your controller, and can stop the request early ("you're not logged in", "you're not allowed to do this").
-- **Controller** (`*.controller.js`) — reads the incoming request (`req.body`, `req.params`), calls the service, sends back the response. It never talks to the database directly.
-- **Service** (`*.service.js`) — this is where the actual thinking happens: "is this allocation allowed?", "does this booking overlap?". This is the layer you'll spend the most time in.
-
-Why bother splitting these up instead of writing it all in one function? Because it means you can change *how* something is triggered (HTTP route today, a scheduled job tomorrow) without rewriting the rule itself. It also means each layer is small enough to actually understand.
+<p align="center">
+  <b>Transforming traditional asset tracking into a smart, digital, and scalable management solution.</b>
+</p>
 
 ---
 
-## 2. Folder structure
+#  Overview
+
+AssetFlow is a smart asset management platform designed to help organizations efficiently track, manage, and monitor their physical assets.
+
+Traditional asset management often relies on spreadsheets and manual records, leading to lost assets, poor tracking, and inefficient allocation.
+
+AssetFlow solves this problem by providing a centralized digital platform with:
+
+* Complete asset lifecycle management
+* QR-based asset identification
+* User assignment tracking
+* Category-based organization
+* Structured database management
+
+The platform enables organizations to know **what assets exist, where they are, who is responsible for them, and their current status.**
+
+---
+
+#  Problem Statement
+
+Organizations managing physical assets face several challenges:
+
+* ❌ Manual tracking through spreadsheets
+* ❌ Difficulty finding asset ownership information
+* ❌ Lack of real-time visibility
+* ❌ Poor maintenance and usage history tracking
+* ❌ Time-consuming inventory verification
+
+AssetFlow provides an automated and organized solution to improve efficiency, accountability, and transparency.
+
+---
+
+#  Solution
+
+AssetFlow creates a complete digital asset ecosystem where organizations can:
+
+✅ Register and manage assets
+✅ Categorize assets efficiently
+✅ Assign assets to users
+✅ Identify assets instantly using QR codes
+✅ Maintain structured asset records
+✅ Monitor asset distribution
+
+---
+
+#  Key Features
+
+##  Smart Asset Management
+
+* Add, update, delete, and view assets
+* Maintain detailed asset information
+* Track asset status and availability
+* Organize assets systematically
+
+---
+
+##  QR Code Asset Identification ⭐
+
+A unique QR code is generated for every asset.
+
+Benefits:
+
+* Instant asset identification
+* Faster verification process
+* Reduces manual searching
+* Improves inventory accuracy
+
+---
+
+##  User & Role Management
+
+* Manage different user roles
+* Maintain accountability
+* Control asset access and operations
+
+---
+
+##  Asset Assignment Tracking
+
+Track:
+
+* Who is using an asset
+* When it was assigned
+* Current ownership status
+
+This creates transparency throughout the asset lifecycle.
+
+---
+
+##  Category Management
+
+* Organize assets into categories
+* Improve filtering and searching
+* Maintain structured records
+
+---
+
+##  Analytics Dashboard
+
+Provides insights into:
+
+* Total assets
+* Asset distribution
+* Availability status
+* Usage patterns
+
+---
+
+#  System Architecture
 
 ```
-assetflow-backend/
+                    React Frontend
+                          |
+                          |
+                    REST API Layer
+                          |
+                          |
+              Node.js + Express Backend
+                          |
+                          |
+                     Prisma ORM
+                          |
+                          |
+                  PostgreSQL Database
+```
+
+---
+
+#  Tech Stack
+
+## Frontend
+
+* React.js
+
+## Backend
+
+* Node.js
+* Express.js
+* REST APIs
+
+## Database
+
+* PostgreSQL
+* Prisma ORM
+
+## Development Tools
+
+* Git & GitHub
+* Postman
+* VS Code
+
+---
+
+#  Database Design
+
+AssetFlow uses a relational database architecture designed for scalability and data consistency.
+
+### Main Entities
+
+```
+User
+ |
+ |
+Assignment
+ |
+ |
+Asset
+ |
+ |
+Category
+```
+
+### Relationships
+
+* One category can contain multiple assets
+* Assets can be assigned to users
+* Assignment records maintain asset history
+
+Database features:
+
+* Relational modeling
+* Prisma migrations
+* Structured schema design
+* Data consistency
+
+---
+
+#  Project Structure
+
+```
+AssetFlow-Management/
+
+├── assetflow-backend/
+│
 ├── prisma/
-│   └── schema.prisma        ← defines every database table (read this first)
-├── src/
-│   ├── config/
-│   │   └── prisma.js        ← the one shared database connection
-│   ├── middleware/
-│   │   ├── auth.middleware.js    ← "are you logged in?"
-│   │   ├── rbac.middleware.js    ← "are you allowed to do THIS?"
-│   │   └── errorHandler.js       ← catches every error, returns clean JSON
-│   ├── utils/
-│   │   ├── ApiError.js      ← lets services throw errors with a status code
-│   │   └── asyncHandler.js  ← boilerplate-killer for async route handlers
-│   ├── modules/              ← one folder per business capability
-│   │   ├── auth/             ← login + account creation
-│   │   ├── assets/           ← the asset state machine
-│   │   ├── allocations/      ← assign assets, prevents double-allocation
-│   │   ├── bookings/         ← time-slot booking, prevents overlaps
-│   │   └── maintenance/      ← approval workflow
-│   ├── app.js                ← wires everything together
-│   └── server.js             ← actually starts the server
-├── .env.example               ← copy this to .env
-└── package.json
+│   ├── schema.prisma
+│   └── seed.js
+│
+├── modules/
+│   └── asset/
+│       ├── asset.controller.js
+│       ├── asset.routes.js
+│       └── asset.service.js
+│
+├── app.js
+├── server.js
+│
+├── AssetFlow Frontend/
+│
+└── README.md
 ```
-
-Each module folder has exactly the same three files (`routes`, `controller`, `service`). Once you understand one module, you understand the shape of all of them — that repetition is deliberate, it's what "reusable module pattern" means in practice.
 
 ---
 
-## 3. Setting it up on your machine (step by step)
+#  Installation & Setup
 
-### Step 1 — Install the tools
-- Install **Node.js** (v18 or newer): https://nodejs.org
-- Install **PostgreSQL**: https://www.postgresql.org/download/ (or use a free hosted one like [Neon](https://neon.tech) or [Supabase](https://supabase.com) if you don't want to install it locally — much easier for a first project)
+## Clone Repository
 
-### Step 2 — Install the project's packages
-Open a terminal inside the `assetflow-backend` folder and run:
+```bash
+git clone <repository-url>
+
+cd AssetFlow-Management
 ```
+
+---
+
+## Backend Setup
+
+```bash
+cd assetflow-backend
+
 npm install
 ```
-This reads `package.json` and downloads every library the project needs (Express, Prisma, etc.) into a `node_modules` folder.
 
-### Step 3 — Configure your database connection
-```
-cp .env.example .env
-```
-Open `.env` and replace `DATABASE_URL` with your real Postgres connection string. If you used a hosted service like Neon, they give you this string directly — just paste it in. Also change `JWT_SECRET` to any random long string (this is what signs your login tokens).
+Create `.env` file:
 
-### Step 4 — Create the actual database tables
+```env
+DATABASE_URL="your_postgresql_database_url"
 ```
-npx prisma migrate dev --name init
-```
-This reads `prisma/schema.prisma` and creates every table in your real database. You should see it print out the tables it created. If this fails, it's almost always the `DATABASE_URL` in `.env` being wrong — double check it.
 
-### Step 5 — Start the server
-```
-npm run dev
-```
-You should see: `AssetFlow backend running on http://localhost:4000`
+Run database setup:
 
-Visit `http://localhost:4000/health` in your browser — you should see `{"status":"ok"}`. If you see that, everything is wired up correctly.
+```bash
+npx prisma migrate dev
+
+npx prisma generate
+```
+
+Start server:
+
+```bash
+npm start
+```
+
+Backend runs at:
+
+```
+http://localhost:5000
+```
 
 ---
 
-## 4. Trying it out (there's no UI yet — use Postman or `curl`)
+#  API Endpoints
 
-**Problem:** every route except login requires a token, but you can't create a token without an admin account, and there's no public "become admin" route (on purpose — see the account creation rule). So the very first user has to be inserted directly.
-
-Open Prisma Studio (a visual database browser) to do this by hand once:
-```
-npm run prisma:studio
-```
-This opens a browser tab where you can manually add:
-1. One row in **Department** (e.g. "IT")
-2. One row in **Employee**, linked to that department
-3. One row in **User**, linked to that employee, with `role = ADMIN`. For the password, you'll need a bcrypt hash — for testing, you can temporarily log the hash by running a quick one-off script, or just use an online bcrypt generator for the word "password123" and paste the hash in.
-
-Once that one admin row exists, everything else happens through the API:
-
-**Log in:**
-```
-curl -X POST http://localhost:4000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"password123"}'
-```
-This returns a `token`. Copy it — every request below needs it in the `Authorization` header.
-
-**Create an asset category and an asset** (needs the token):
-```
-curl -X POST http://localhost:4000/api/assets \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -d '{"assetTag":"AF-0114","categoryId":1}'
-```
-
-**Allocate it to an employee:**
-```
-curl -X POST http://localhost:4000/api/allocations \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -d '{"assetId":1,"employeeId":1}'
-```
-
-**Try allocating the same asset again** — you should get back a `409 Conflict` with the message "This asset already has an active allocation." That's the double-allocation rule working.
-
-**Try booking a resource with an overlapping time** — you'll get a `409` naming the conflicting booking's time window.
+| Method | Endpoint          | Description         |
+| ------ | ----------------- | ------------------- |
+| GET    | `/api/assets`     | Fetch all assets    |
+| GET    | `/api/assets/:id` | Fetch asset details |
+| POST   | `/api/assets`     | Create asset        |
+| PUT    | `/api/assets/:id` | Update asset        |
+| DELETE | `/api/assets/:id` | Delete asset        |
 
 ---
 
-## 5. How the "prevent double-allocation" rule actually works
+#  Engineering Highlights
 
-This trips people up, so it's worth walking through slowly. Look at `src/modules/allocations/allocation.service.js`.
-
-There are actually **three layers of protection**, from loosest to strictest:
-1. **The state machine** (`asset.service.js`) — an asset must be `AVAILABLE` before it can become `ALLOCATED`. If it's already `ALLOCATED`, this step alone would already reject it.
-2. **The database transaction** (`prisma.$transaction`) — everything inside happens as one atomic unit. If any step fails, all of it is rolled back, so you never end up with "asset says allocated but there's no allocation row."
-3. **The database constraint** (`@@unique([assetId, status])` in `schema.prisma`) — this is the final safety net. Even if there were a bug in the JavaScript logic above, Postgres itself physically refuses to store two `ACTIVE` allocation rows for the same asset. This is what makes it safe even if two people click "allocate" at the exact same millisecond.
-
-The booking overlap check (`booking.service.js`) works the same way conceptually, just comparing time ranges instead of a status flag.
+* Modular backend architecture
+* RESTful API design
+* Prisma ORM integration
+* PostgreSQL relational database
+* Database migrations
+* Input validation
+* Error handling
+* Scalable project structure
 
 ---
 
-## 6. What to build next, in order
+#  Future Enhancements
 
-1. **Employee & Department CRUD** — you'll need simple create/list routes for these before anything else is testable end-to-end. Copy the shape of `assets` module.
-2. **Notifications module** — a scheduled job (look up `node-cron`) that scans for overdue allocations/bookings nightly and inserts `Notification` rows.
-3. **Audit module** — `AuditCycle` creation, assigning auditors, and a route where an auditor submits the "found state" for an asset, which auto-creates a `DiscrepancyReport` if it doesn't match.
-4. **Dashboard/KPI endpoint** — a route that just runs `count()` queries grouped by state — e.g. `prisma.asset.groupBy({ by: ['state'], _count: true })` gives you the "Available: 128, Allocated: 76" numbers directly.
-5. Only once the API works end-to-end, connect a frontend (your Excalidraw screens) to these endpoints.
+* AI-based asset usage prediction
+* Automated inventory auditing
+* Mobile application
+* Maintenance scheduling
+* Real-time asset tracking
+* Advanced analytics
 
-## 7. Common beginner mistakes to avoid
+---
 
-- **Don't** put database queries in controllers. If you find yourself writing `prisma.something` in a `*.controller.js` file, move it into the matching `*.service.js`.
-- **Don't** trust `req.body.role` or `req.body.userId` for who's making a request — always use `req.user` (set by `auth.middleware.js` from the verified token). Anything from `req.body` can be faked by the client.
-- **Don't** skip the transaction when a rule involves more than one table write (asset state + allocation row, request status + asset state, etc.) — that's exactly when partial failures create corrupted data.
-- **Do** re-read section 5 whenever you add a new "prevent X" rule elsewhere in the app (e.g. preventing an audit from closing with unresolved discrepancies) — the same three-layer pattern applies.
+#  Demo
+
+(Add deployed link / demo video here)
+
+---
+
+#  Team
+
+## Hackathon 2026
+
+Built by:
+
+* Member : Mayank Sati 
+* Member : Pranav Juyal
+* Member : Anuj Semwal
+* Member : Vansh Panwar
+
+---
+
+#  Why AssetFlow?
+
+AssetFlow combines **database-driven asset management, QR-based identification, and scalable backend architecture** to solve a real-world organizational problem.
+
+It transforms asset tracking from a manual process into an intelligent digital workflow.
