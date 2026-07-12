@@ -27,6 +27,62 @@ const ReportsPage = {
         </div>
 
         <div class="reports-grid">
+          <!-- Total Assets (Stat Card) -->
+          <div class="report-card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+            <h4 style="color:#a0a0c0; margin-bottom: 12px; font-weight:600;">Total Assets</h4>
+            <div style="font-size: 3.5rem; font-weight: 700; color: #f1f1f8; line-height:1;">${assets.length}</div>
+          </div>
+
+          <!-- Assets by Category -->
+          <div class="report-card">
+            <div class="report-card-header">
+              <h4>Assets by Category</h4>
+            </div>
+            <div class="report-card-body">
+              <div class="chart-container" style="height:220px;"><canvas id="categoryChart"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Assets by Status -->
+          <div class="report-card">
+            <div class="report-card-header">
+              <h4>Assets by Status</h4>
+            </div>
+            <div class="report-card-body">
+              <div class="chart-container" style="height:220px;"><canvas id="statusChart"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Assigned vs Available -->
+          <div class="report-card">
+            <div class="report-card-header">
+              <h4>Assigned vs Available</h4>
+            </div>
+            <div class="report-card-body">
+              <div class="chart-container" style="height:220px;"><canvas id="assignedChart"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Top Department by Assets -->
+          <div class="report-card" style="grid-column: span 2;">
+            <div class="report-card-header">
+              <h4>Top Department by Assets</h4>
+            </div>
+            <div class="report-card-body">
+              <div class="chart-container" style="height:220px;"><canvas id="topDeptChart"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Monthly Asset Additions -->
+          <div class="report-card" style="grid-column: span 2;">
+            <div class="report-card-header">
+              <h4>Monthly Asset Additions (${new Date().getFullYear()})</h4>
+            </div>
+            <div class="report-card-body">
+              <div class="chart-container" style="height:250px;"><canvas id="additionsChart"></canvas></div>
+            </div>
+          </div>
+
           <!-- Asset Utilization -->
           <div class="report-card">
             <div class="report-card-header">
@@ -102,6 +158,55 @@ const ReportsPage = {
   initCharts(assets, allocations, maintenance, bookings, departments, categories) {
     this.charts.forEach(c => Charts.destroy(c));
     this.charts = [];
+
+    // --- NEW CHARTS ---
+    // Assets by Category
+    const catCounts = {};
+    assets.forEach(a => {
+      const cat = categories.find(c => c.id === a.categoryId)?.name || 'Unknown';
+      catCounts[cat] = (catCounts[cat] || 0) + 1;
+    });
+    const ccChart = Charts.renderDoughnut('categoryChart', Object.keys(catCounts), Object.values(catCounts));
+    if (ccChart) this.charts.push(ccChart);
+
+    // Assets by Status
+    const statusCounts = {};
+    assets.forEach(a => {
+      statusCounts[a.status] = (statusCounts[a.status] || 0) + 1;
+    });
+    const scChart = Charts.renderDoughnut('statusChart', Object.keys(statusCounts), Object.values(statusCounts));
+    if (scChart) this.charts.push(scChart);
+
+    // Assigned vs Available
+    const assigned = assets.filter(a => a.status === 'Allocated').length;
+    const available = assets.filter(a => a.status === 'Available').length;
+    const aaChart = Charts.renderDoughnut('assignedChart', ['Assigned', 'Available'], [assigned, available], {
+      plugins: { legend: { position: 'bottom' } }
+    });
+    if (aaChart) this.charts.push(aaChart);
+
+    // Top Department by Assets
+    const deptAssets = departments.map(d => {
+      return { name: d.name, count: assets.filter(a => a.departmentId === d.id).length };
+    }).sort((a, b) => b.count - a.count).slice(0, 5); // Top 5
+    const tdChart = Charts.renderHorizontalBar('topDeptChart', deptAssets.map(d => d.name), deptAssets.map(d => d.count));
+    if (tdChart) this.charts.push(tdChart);
+
+    // Monthly Asset Additions
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentYear = new Date().getFullYear();
+    const additionsByMonth = new Array(12).fill(0);
+    assets.forEach(a => {
+      if (a.acquisitionDate) {
+        const d = new Date(a.acquisitionDate);
+        if (d.getFullYear() === currentYear) {
+          additionsByMonth[d.getMonth()]++;
+        }
+      }
+    });
+    const addChart = Charts.renderLine('additionsChart', months, [{ label: 'New Assets', data: additionsByMonth, fill: true, color: '#3b82f6', bgColor: 'rgba(59,130,246,0.1)' }]);
+    if (addChart) this.charts.push(addChart);
+    // --- END NEW CHARTS ---
 
     // 1. Asset Utilization — allocation count per asset
     const allocCounts = {};
