@@ -28,11 +28,11 @@ The platform enables organizations to know **what assets exist, where they are, 
 
 Organizations managing physical assets face several challenges:
 
-* ❌ Manual tracking through spreadsheets
-* ❌ Difficulty finding asset ownership information
-* ❌ Lack of real-time visibility
-* ❌ Poor maintenance and usage history tracking
-* ❌ Time-consuming inventory verification
+*  Manual tracking through spreadsheets
+*  Difficulty finding asset ownership information
+*  Lack of real-time visibility
+*  Poor maintenance and usage history tracking
+*  Time-consuming inventory verification
 
 AssetFlow provides an automated and organized solution to improve efficiency, accountability, and transparency.
 
