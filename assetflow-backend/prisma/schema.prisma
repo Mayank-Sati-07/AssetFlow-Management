@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ALLOCATED
+  MAINTENANCE
+  RETIRED
+}
+
+enum AllocationStatus {
+  ACTIVE
+  ENDED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum MaintenanceStatus {
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  passwordHash String
+  name         String?
+  isActive     Boolean     @default(true)
+
+  roles        UserRole[]
+
+  allocations  Allocation[] @relation("AllocationsAssignee")
+  bookings     Booking[]    @relation("BookingsRequester")
+
+  maintenanceRequested MaintenanceRequest[] @relation("MaintenanceRequestedBy")
+  maintenanceApproved  MaintenanceRequest[] @relation("MaintenanceApprovedBy")
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+
+  users       UserRole[]
+  permissions RolePermission[]
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  action      String           @unique
+  description String?
+
+  roles       RolePermission[]
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model UserRole {
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId String
+
+  @@id([userId, roleId])
+}
+
+model RolePermission {
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId       String
+
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  permissionId String
+
+  @@id([roleId, permissionId])
+}
+
+model Asset {
+  id          String      @id @default(cuid())
+  tag         String      @unique
+  name        String
+  description String?
+  status      AssetStatus @default(AVAILABLE)
+  location    String?
+
+  allocations Allocation[]
+  bookings    Booking[]
+  maintenanceRequests MaintenanceRequest[]
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Allocation {
+  id         String           @id @default(cuid())
+  asset      Asset            @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  assetId    String
+
+  assignee   User             @relation("AllocationsAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
+  assigneeId String
+
+  startDate  DateTime         @default(now())
+  endDate    DateTime?
+  status     AllocationStatus @default(ACTIVE)
+
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@index([assetId, status])
+  @@index([assigneeId, status])
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  asset       Asset         @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  assetId     String
+
+  requester   User          @relation("BookingsRequester", fields: [requesterId], references: [id], onDelete: Restrict)
+  requesterId String
+
+  startDate   DateTime
+  endDate     DateTime
+  status      BookingStatus @default(PENDING)
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([assetId, startDate, endDate])
+  @@index([requesterId, startDate, endDate])
+}
+
+model MaintenanceRequest {
+  id             String            @id @default(cuid())
+  asset          Asset             @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  assetId        String
+
+  requestedBy    User              @relation("MaintenanceRequestedBy", fields: [requestedById], references: [id], onDelete: Restrict)
+  requestedById  String
+
+  description    String
+  status         MaintenanceStatus @default(PENDING_APPROVAL)
+
+  approvedBy     User?             @relation("MaintenanceApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedById   String?
+  approvedAt     DateTime?
+
+  resolutionNotes String?
+
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([assetId, status])
+  @@index([requestedById, status])
+}
