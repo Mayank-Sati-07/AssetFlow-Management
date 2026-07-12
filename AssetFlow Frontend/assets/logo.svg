@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="30" y1="30" x2="90" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#a5b4fc"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="28" fill="url(#g1)"/>
+  <!-- Stylized 'AF' mark made of geometric shapes -->
+  <path d="M35 85L60 30L85 85" stroke="white" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <line x1="43" y1="68" x2="77" y2="68" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <path d="M70 50H90" stroke="url(#g2)" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="90" cy="50" r="4" fill="#c4b5fd"/>
+</svg>
