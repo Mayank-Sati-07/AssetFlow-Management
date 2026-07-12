@@ -109,6 +109,7 @@ model Asset {
   allocations Allocation[]
   bookings    Booking[]
   maintenanceRequests MaintenanceRequest[]
+  qrToken String? @unique
 }
 model Allocation {
   id         String           @id @default(cuid())

@@ -9,6 +9,7 @@ const errorHandler = require('./middleware/errorHandler')
 
 const authRoutes = require('./modules/auth/routes')
 const assetsRoutes = require('./modules/assets/routes')
+const assetRoutes = require('./modules/asset/asset.routes')
 const allocationsRoutes = require('./modules/allocations/routes')
 const bookingsRoutes = require('./modules/bookings/routes')
 const maintenanceRoutes = require('./modules/maintenance/routes')
@@ -25,6 +26,7 @@ app.get('/health', (_req, res) => {
 
 app.use('/api/auth', authRoutes)
 app.use('/api/assets', assetsRoutes)
+app.use('/api/assets', assetRoutes)
 app.use('/api/allocations', allocationsRoutes)
 app.use('/api/bookings', bookingsRoutes)
 app.use('/api/maintenance', maintenanceRoutes)

@@ -1,4 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
+const crypto = require("crypto");
 
 const prisma = new PrismaClient();
 
@@ -115,12 +116,14 @@ console.log("User roles assigned successfully!");
         name: "Dell Latitude Laptop",
         description: "Development laptop",
         categoryId: laptopCategory.id,
+        qrToken: crypto.randomUUID(),
       },
       {
         tag: "MOB-001",
         name: "iPhone 15",
         description: "Company mobile phone",
         categoryId: mobileCategory.id,
+        qrToken: crypto.randomUUID(),
       },
     ],
     skipDuplicates: true,
