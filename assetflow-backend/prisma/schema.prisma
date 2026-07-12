@@ -103,14 +103,13 @@ model Asset {
   status      AssetStatus @default(AVAILABLE)
   location    String?
 
+  category    Category    @relation(fields: [categoryId], references: [id])
+  categoryId  String
+
   allocations Allocation[]
   bookings    Booking[]
   maintenanceRequests MaintenanceRequest[]
-
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
 }
-
 model Allocation {
   id         String           @id @default(cuid())
   asset      Asset            @relation(fields: [assetId], references: [id], onDelete: Restrict)
@@ -171,4 +170,15 @@ model MaintenanceRequest {
 
   @@index([assetId, status])
   @@index([requestedById, status])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+
+  assets      Asset[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
