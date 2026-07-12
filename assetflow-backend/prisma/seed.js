@@ -77,6 +77,35 @@ async function main() {
   });
 
   console.log("Users inserted successfully!");
+  // Assign roles to users
+
+const adminRole = await prisma.role.findUnique({
+  where: {
+    name: "Admin",
+  },
+});
+
+const employeeRole = await prisma.role.findUnique({
+  where: {
+    name: "Employee",
+  },
+});
+
+await prisma.userRole.createMany({
+  data: [
+    {
+      userId: admin.id,
+      roleId: adminRole.id,
+    },
+    {
+      userId: employee.id,
+      roleId: employeeRole.id,
+    },
+  ],
+  skipDuplicates: true,
+});
+
+console.log("User roles assigned successfully!");
 
   // Assets
   await prisma.asset.createMany({
