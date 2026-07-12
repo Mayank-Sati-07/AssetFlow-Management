@@ -42,12 +42,12 @@ AssetFlow provides an automated and organized solution to improve efficiency, ac
 
 AssetFlow creates a complete digital asset ecosystem where organizations can:
 
-✅ Register and manage assets
-✅ Categorize assets efficiently
-✅ Assign assets to users
-✅ Identify assets instantly using QR codes
-✅ Maintain structured asset records
-✅ Monitor asset distribution
+ Register and manage assets
+ Categorize assets efficiently
+ Assign assets to users
+ Identify assets instantly using QR codes
+ Maintain structured asset records
+ Monitor asset distribution
 
 ---
 
@@ -62,7 +62,7 @@ AssetFlow creates a complete digital asset ecosystem where organizations can:
 
 ---
 
-##  QR Code Asset Identification ⭐
+##  QR Code Asset Identification 
 
 A unique QR code is generated for every asset.
 
